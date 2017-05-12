@@ -111,4 +111,4 @@ class Sistemas extends ModelBase {
     });
   }
 }
-export default Sistemas;
+export default new Sistemas();

@@ -1,6 +1,4 @@
-import resource from 'resource-router-middleware';
 import Sistemas from '../models/Sistemas';
-let sistemas = new Sistemas();
 
 function transformTablesJson2CSV(data) {
   let results = [];
@@ -29,14 +27,15 @@ let generalFunctions = {
    *  Errors terminate the request, success sets `req[id] = data`.
    */
   load(req, id, callback) {
-    sistemas.getSistema(id)
+    Sistemas.getSistema(id)
       .then( (data) => callback(null, data[0]) )
       .catch( (reason) => callback(reason) );
   },
 
   /** GET / - List all entities */
   index({ params }, res) {
-    sistemas.getAll()
+    console.log('Real');
+    Sistemas.getAll()
       .then( (data) => res.json(data) )
       .catch( (reason) => res.status(400).send(reason) );
   },
@@ -47,43 +46,46 @@ let generalFunctions = {
   }
 };
 let extraFunctions = {
-  users({params},res) {
-    let sistema = params.sistema;
-    if (sistema && sistema.length > 0) {
-      sistemas.getAllSistemaDbUsers(sistema)
-        .then( (data) => res.json(data) )
-        .catch( (reason) => res.status(400).send(reason) );
-    }
-    else {
-      res.status(400).send({message:'Invalid sistema param'});
+  users:{
+    verb:'get',
+    action:({params},res) => {
+      let sistema = params.sistema;
+      if (sistema && sistema.length > 0) {
+        Sistemas.getAllSistemaDbUsers(sistema)
+          .then( (data) => res.json(data) )
+          .catch( (reason) => res.status(400).send(reason) );
+      }
+      else {
+        res.status(400).send({message:'Invalid sistema param'});
+      }
     }
   },
-  tables({params, query},res) {
-    let format = query.format;
-    let sistema = params.sistema;
-    if (sistema && sistema.length > 0) {
-      sistemas.getTablesReadBySistema(sistema)
-        .then( (data) => {
-          let result = data;
-          if (format && 'csv' == format.toLowerCase()) {
-            result = transformTablesJson2CSV(data);
-            res.status(200).send(result);
-          }
-          else res.json(result);
-        } )
-        .catch( (reason) => res.status(400).send(reason) );
-    }
-    else {
-      res.status(400).send({message:'Invalid sistema param'});
+  tables:{
+    verb:'get',
+    action:({params, query},res) => {
+      let format = query.format;
+      let sistema = params.sistema;
+      if (sistema && sistema.length > 0) {
+        Sistemas.getTablesReadBySistema(sistema)
+          .then( (data) => {
+            let result = data;
+            if (format && 'csv' == format.toLowerCase()) {
+              result = transformTablesJson2CSV(data);
+              res.status(200).send(result);
+            }
+            else res.json(result);
+          } )
+          .catch( (reason) => res.status(400).send(reason) );
+      }
+      else {
+        res.status(400).send({message:'Invalid sistema param'});
+      }
     }
   }
 }
 
-export default ({ config, db }) => {
-  sistemas.setConfig(config);
-  let router = resource(generalFunctions);
-  for (let key in extraFunctions) {
-    router.get('/:sistema/'+key,extraFunctions[key]);
-  }
-  return router;
-}
+export default {
+  generalFunctions:generalFunctions,
+  extraFunctions:extraFunctions,
+  setConfig:(config) => { Sistemas.setConfig(config); }
+};

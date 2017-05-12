@@ -1,4 +1,3 @@
-import resource from 'resource-router-middleware';
 import Tabelas from '../models/Tabelas';
 let tabelas = new Tabelas();
 
@@ -41,11 +40,8 @@ let generalFunctions = {
 let extraFunctions = {
 }
 
-export default ({ config, db }) => {
-  tabelas.setConfig(config);
-  let router = resource(generalFunctions);
-  for (let key in extraFunctions) {
-    router.get('/:tabela/'+key,extraFunctions[key]);
-  }
-  return router;
+export default {
+  generalFunctions:generalFunctions,
+  extraFunctions:extraFunctions,
+  setConfig:(config) => { tabelas.setConfig(config); }
 }
