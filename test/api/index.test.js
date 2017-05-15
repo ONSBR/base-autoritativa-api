@@ -1,3 +1,4 @@
+import { version } from '../../package.json';
 import chai from 'chai';
 import sinon from 'sinon';
 // import sinonTest from 'sinon-test';
@@ -5,12 +6,16 @@ import sinon from 'sinon';
 // sinon.testCase = sinonTest.configureTestCase(sinon);
 
 import sistemas from '../../src/api/sistemas';
+import tabelas from '../../src/api/tabelas';
+import bulkcreate from '../../src/api/bulkcreate';
+
 let mockStubs = {
   index: {},
   load: {},
   read: {},
   users: {},
-  tables: {}
+  tables: {},
+  tabelas_de_banco_de_dados: {}
 };
 
 import Api from '../../src/api';
@@ -120,4 +125,46 @@ describe('base-autoritativa-api', () => {
       done();
     });
   });
+
+  it('should call tabelas api module function from /tabelas/id', (done) => {
+    mockStubs.load = sinon.stub(tabelas.generalFunctions,'load');
+    mockStubs.read = sinon.stub(tabelas.generalFunctions,'read');
+    let router = Api({ config, db });
+    mockStubs.load.callsFake((req, id, cb) => {
+      cb(null,id);
+    });
+    mockStubs.read.callsFake((req,res) => {
+      return res.json({})
+    });
+    router.handle({ url: '/tabelas/id', method: 'GET' }, {end:() => {return}}, () => {
+      mockStubs.load.calledOnce.should.be.ok;
+      mockStubs.read.calledOnce.should.be.ok;
+      mockStubs.read.restore();
+      mockStubs.load.restore();
+      done();
+    });
+  });
+
+  it('should call bulkcreate api module function from /bulkcreate/tabelas_de_banco_de_dados', (done) => {
+    mockStubs.tabelas_de_banco_de_dados = sinon.stub(bulkcreate.extraFunctions.tabelas_de_banco_de_dados,'action');
+    mockStubs.tabelas_de_banco_de_dados.callsFake((req,res) => {
+      return res.json({})
+    });
+    let router = Api({ config, db });
+    router.handle({ url: '/bulkcreate/tabelas_de_banco_de_dados', method: 'GET' }, {end:() => {return}}, () => {
+      mockStubs.tabelas_de_banco_de_dados.calledOnce.should.be.ok;
+      mockStubs.tabelas_de_banco_de_dados.restore();
+      done();
+    });
+  });
+
+  it('should return api version from /', (done) => {
+    let router = Api({ config, db });
+    router.handle({ url: '/', method: 'GET' }, {end:() => {return},json:(v)=>{
+      v.should.be.equal(version);
+    }}, () => {
+      done();
+    });
+  });
+
 });
