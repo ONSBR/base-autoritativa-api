@@ -34,7 +34,6 @@ let generalFunctions = {
 
   /** GET / - List all entities */
   index({ params }, res) {
-    console.log('Real');
     Sistemas.getAll()
       .then( (data) => res.json(data) )
       .catch( (reason) => res.status(400).send(reason) );

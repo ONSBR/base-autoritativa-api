@@ -53,7 +53,8 @@
     "mockery": "^2.0.0",
     "nock": "^9.0.13",
     "nodemon": "^1.9.2",
-    "sinon": "^2.2.0"
+    "sinon": "^2.2.0",
+    "sinon-test": "^1.0.2"
   },
   "bugs": {
     "url": "https://github.com/coichedid/base-autoritativa-api/issues"
