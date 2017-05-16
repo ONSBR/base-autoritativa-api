@@ -1,5 +1,4 @@
 import Tabelas from '../models/Tabelas';
-let tabelas = new Tabelas();
 
 let generalFunctions = {
 };
@@ -7,7 +6,7 @@ let extraFunctions = {
   tabelas_de_banco_de_dados:{
     verb:'get',
     action:({params},res) => {
-      tabelas.getTabelasDeBancoDeDadosLinks()
+      Tabelas.getTabelasDeBancoDeDadosLinks()
         .then( (data) => res.json(data) )
         .catch( (reason) => res.status(400).send(reason) );
     }
@@ -17,5 +16,5 @@ let extraFunctions = {
 export default {
   generalFunctions:generalFunctions,
   extraFunctions:extraFunctions,
-  setConfig:(config) => { tabelas.setConfig(config); }
+  setConfig:(config) => { Tabelas.setConfig(config); }
 }

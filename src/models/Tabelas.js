@@ -19,8 +19,8 @@ class Tabelas extends ModelBase{
   *
   */
   getTabela(tabela) {
+    if (!tabela || tabela.length == 0) return new Promise( (resolve,reject) => {reject('No Tabela name provided')} );
     let lwTabela = tabela.replace(/ /g,'_').toLowerCase();
-    console.log(lwTabela);
     let statement = this.statements['oneTabela'].replace(/_TABELA_/g,lwTabela),
       args = this._getArguments(statement);
     return this._fetchResults(args);
@@ -85,4 +85,4 @@ class Tabelas extends ModelBase{
       });
     }
 }
-export default Tabelas;
+export default new Tabelas();

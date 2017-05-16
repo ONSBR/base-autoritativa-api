@@ -10,11 +10,6 @@ let mockStubs = {
 
 import sistemas from '../../src/api/sistemas';
 
-
-
-import Api from '../../src/api';
-
-
 let should = chai.should();
 let expect = chai.expect;
 let db = {}, config = {};
@@ -268,6 +263,7 @@ describe('sistemas handler', () => {
       status: (errCode) => {
         return {
           send:(reason)=>{
+            mockStubs.getTablesReadBySistema.restore();
             done('Unhandled error');
           }};
       }
@@ -348,6 +344,7 @@ describe('sistemas handler', () => {
     });
     sistemas.extraFunctions.tables.action({params:{sistema:'test'},query:{format:'csv'}}, {
       json:(data) => {
+        mockStubs.getTablesReadBySistema.restore();
         done('Unhandled format');
       },
       status: (stat) => {
@@ -377,6 +374,7 @@ describe('sistemas handler', () => {
       status: (errCode) => {
         return {
           send:(reason)=>{
+            mockStubs.getTablesReadBySistema.restore();
             done('Unhandled error');
           }};
       }

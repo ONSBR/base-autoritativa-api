@@ -88,7 +88,7 @@ class ModelBase {
           reject(data.errors);
         }
         else {
-          if (!data || !validateResults(data,validationAttributes)) {
+          if (!data || !this._validateResults(data,validationAttributes)) {
             resolve({});
           }
           else {
@@ -112,7 +112,7 @@ class ModelBase {
    */
    _validateResults(data,attributes) {
      if (!attributes || attributes.length == 0) return true;
-     return data[attributes[0]]?_validateResults(data[attributes[0]],attributes.slice(1)):false;
+     return data[attributes[0]]?this._validateResults(data[attributes[0]],attributes.slice(1)):false;
    }
 
   /**

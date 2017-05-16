@@ -1,5 +1,4 @@
 import Tabelas from '../models/Tabelas';
-let tabelas = new Tabelas();
 
 function transformResultJson2CSV(data) {
   let resultline = [], results = [];
@@ -22,7 +21,7 @@ let generalFunctions = {
    *  Errors terminate the request, success sets `req[id] = data`.
    */
   load(req, id, callback) {
-    tabelas.getTabela(id)
+    Tabelas.getTabela(id)
       .then( (data) => callback(null, data[0]) )
       .catch( (reason) => callback(reason) );
   },
@@ -43,5 +42,5 @@ let extraFunctions = {
 export default {
   generalFunctions:generalFunctions,
   extraFunctions:extraFunctions,
-  setConfig:(config) => { tabelas.setConfig(config); }
+  setConfig:(config) => { Tabelas.setConfig(config); }
 }
