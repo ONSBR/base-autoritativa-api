@@ -175,7 +175,6 @@ describe('Tabelas Model', () => {
   it('should get a list of Tabela de Banco de Dados', (done) => {
     mockStubs._fetchWebApiResults = sinon.stub(Tabelas,'_fetchWebApiResults');
     mockStubs._fetchWebApiResults.callsFake( (statement, validationAttributes, args, verb, parseFunction) => {
-      console.log('_fetchWebApiResults fake');
       statement.should.be.equal(statements['tabelasWiki']);
       validationAttributes.should.be.ok;
       validationAttributes.should.be.a('array');
