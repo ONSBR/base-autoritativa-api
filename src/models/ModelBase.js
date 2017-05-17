@@ -49,7 +49,7 @@ class ModelBase {
   _fetchResults(args, parseFunction) {
     let mapaInformacaoBaseUrl = this.config.mapaInformacaoBaseUrl;
     return new Promise( (resolve, reject) => {
-      client.post(mapaInformacaoBaseUrl, args, (data, response) => {
+      client.post(mapaInformacaoBaseUrl, args, (data) => {
         if (data.errors && data.errors.length > 0) {
           reject(data.errors);
         }
@@ -83,7 +83,7 @@ class ModelBase {
   _fetchWebApiResults(uri, validationAttributes,args, verb, parseFunction) {
     let queryUrl = this.config.wikiBaseUrl + uri;
     return new Promise( (resolve, reject) => {
-      client[verb](queryUrl, args, (data, response) => {
+      client[verb](queryUrl, args, (data) => {
         if (data.errors && data.errors.length > 0) {
           reject(data.errors);
         }

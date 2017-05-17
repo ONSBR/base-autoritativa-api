@@ -30,7 +30,7 @@ let generalFunctions = {
   read({tabela,query}, res) {
     let format = query.format;
     if (format && 'csv' == format.toLowerCase()) {
-      result = transformResultJson2CSV(tabela);
+      let result = transformResultJson2CSV(tabela);
       res.status(200).send(result);
     }
     else res.json(tabela);
