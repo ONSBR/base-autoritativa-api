@@ -1,14 +1,19 @@
 // our example model is just an Array
 import ModelBase from './ModelBase';
+import {MapaInformacaoConnector} from 'base-autoritativa-connectors';
+
 class Tabelas extends ModelBase{
   constructor() {
     super();
     this.statements = {
-      "oneTabela":"MATCH (v:`Tabela`) WHERE (lower(v.`Identificador`) = '_TABELA_' OR lower(v.`Código`) = '_TABELA_' OR lower(v.`Nome`) = '_TABELA_') RETURN v",
       "tabelasWiki":"/api.php?action=ask&format=json&query=%5B%5BPossui+direito+de+leitura+em%3A%3A%2B%5D%5D%7C%3FPossui+direito+de+leitura+em%7Cmainlabel%3D-+",
       "create_page":"/api.php?action=edit&format=json&title=__PAGETITLE__&section=0&text=__BODY__&token=__TOKEN__",
       "get_token":"/api.php?action=query&meta=tokens"
     }
+  }
+
+  setEntityConfig() {
+    this.mapaInformacaoConnector = new MapaInformacaoConnector(this.config.mapaInformacaoBaseUrl,this.config.authentication);
   }
   /**
   *
@@ -19,11 +24,7 @@ class Tabelas extends ModelBase{
   *
   */
   getTabela(tabela) {
-    if (!tabela || tabela.length == 0) return new Promise( (resolve,reject) => {reject('No Tabela name provided')} );
-    let lwTabela = tabela.replace(/ /g,'_').toLowerCase();
-    let statement = this.statements['oneTabela'].replace(/_TABELA_/g,lwTabela),
-      args = this._getArguments(statement);
-    return this._fetchResults(args);
+    return this.mapaInformacaoConnector.getTabela(tabela);
   }
 
   /**
@@ -32,7 +33,7 @@ class Tabelas extends ModelBase{
    * return a Promise of an array of objects representing sistema
    *
    */
-   getTabelasDeBancoDeDadosLinks() {
+   getTabelasDeBancoDeDadosLinks() { 
      let statement = this.statements['tabelasWiki'];
 
      return this._fetchWebApiResults(statement,['query','results'],{},'get', (data) => {

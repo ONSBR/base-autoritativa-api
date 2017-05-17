@@ -1,14 +1,14 @@
 // our example model is just an Array
 import ModelBase from './ModelBase';
+import {MapaInformacaoConnector} from 'base-autoritativa-connectors';
+
 class Sistemas extends ModelBase {
   constructor() {
     super();
-    this.statements = {
-      "allSistemas":"MATCH (v:`Sistema`) RETURN v ORDER BY v. `Identificador` SKIP { s } LIMIT { l }",
-  		"oneSistema":"MATCH (v:`Sistema`) WHERE (lower(v.`Identificador`) CONTAINS '_SISTEMA_' OR lower(v.`Código`) CONTAINS '_SISTEMA_') RETURN v ORDER BY v.`Identificador` SKIP { s } LIMIT { l }",
-  		"allSistemaDBUsers":"MATCH (v:`Login`) WHERE (lower(v.`Identificador`) CONTAINS '_SISTEMA_' OR lower(v.`Código`) CONTAINS '_SISTEMA_') RETURN v ORDER BY v.`Identificador` SKIP { s } LIMIT { l }",
-  		"allTablesReadBySistema":"MATCH (vFrom)-[r]->(vTo) WHERE (id(vFrom) IN [_CODIGOS_] OR id(vTo) IN [_CODIGOS_]) AND type(r) = 'é uma Tabela com leitura pelo Login' RETURN id(vFrom), vFrom.`Identificador`, type(r), id(vTo), vTo.`Identificador` ORDER BY r.type, vFrom.`Identificador`, vTo.`Identificador` SKIP { s } LIMIT { l }"
-    }
+  }
+
+  setEntityConfig() {
+    this.mapaInformacaoConnector = new MapaInformacaoConnector(this.config.mapaInformacaoBaseUrl,this.config.authentication);
   }
   /**
   *
@@ -16,9 +16,7 @@ class Sistemas extends ModelBase {
   * return a Promise to retrived data
   */
   getAll() {
-    let statement = this.statements['allSistemas'],
-      args = this._getArguments(statement);
-    return this._fetchResults(args);
+    return this.mapaInformacaoConnector.getAllSistemas(); 
   }
 
   /**
@@ -30,15 +28,7 @@ class Sistemas extends ModelBase {
   *
   */
   getSistema(sistema) {
-    if (!sistema || sistema.length == 0) {
-      return new Promise( (resolve,reject) => {reject('No Sistema name provided')} )
-    }
-    else {
-      let lwSistema = sistema.toLowerCase();
-      let statement = this.statements['oneSistema'].replace(/_SISTEMA_/g,lwSistema),
-        args = this._getArguments(statement);
-      return this._fetchResults(args);
-    }
+    return this.mapaInformacaoConnector.getSistema(sistema);
   }
 
   /**
@@ -49,13 +39,7 @@ class Sistemas extends ModelBase {
   * return a Promisse of an array of database users internal logins
   */
   getAllSistemaDbUsers(sistema) {
-    if (!sistema || sistema.length == 0) return new Promise( (resolve,reject) => {reject('No Sistema name provided')} )
-    else {
-      let lwSistema = sistema.toLowerCase();
-      let statement = this.statements['allSistemaDBUsers'].replace(/_SISTEMA_/g,lwSistema),
-        args = this._getArguments(statement);
-      return this._fetchResults(args);
-    }
+    return this.mapaInformacaoConnector.getAllSistemaDbUsers(sistema);
   }
 
   /**
@@ -66,60 +50,41 @@ class Sistemas extends ModelBase {
    * return a Promisse of an array of database users internal logins and respective accessed tables
    */
   getTablesReadBySistema(sistema) {
-    if (!sistema || sistema.length == 0) return new Promise( (resolve, reject) => {reject('No Sistema name provided')} )
-    else {
-      let lwSistema = sistema.toLowerCase();
-      let tableStatement = this.statements['allTablesReadBySistema'];
-      return new Promise( (resolve,reject) => {
-        this.getAllSistemaDbUsers(lwSistema)
-          .then( (userData) => {
-            let userCodes = '';
-            userData.map( (u) => {
-              userCodes += (u.id + ',');
-            });
+    return new Promise( (resolve,reject) => {
+      this.mapaInformacaoConnector.getAllSistemaDbUsers(sistema)
+        .then( (userData) => {
+          let userCodes = '';
+          userData.map( (u) => {
+            userCodes += (u.id + ',');
+          });
 
-            if (userCodes != '') {
-              userCodes = userCodes.slice(0,-1);
-              tableStatement = tableStatement.replace(/_CODIGOS_/g,userCodes);
-              let args = this._getArguments(tableStatement);
-              this._fetchResults(args, (r, parsedResults) => {
-                if (r.rest && r.rest.length == 5) {
-                  let rData = {
-                    fromId:r.rest[0],
-                    fromIdentificador:r.rest[1],
-                    verb:r.rest[2],
-                    toId:r.rest[3],
-                    toIdentificador:r.rest[4]
+          if (userCodes != '') {
+            userCodes = userCodes.slice(0,-1);
+            this.mapaInformacaoConnector.getTablesReadByUser(userCodes)
+              .then( (data) => {
+                let reducedData = {};
+                let mainCount = 0;
+                data.map( (d) => {
+                  if (!reducedData[d.toIdentificador]) {
+                    reducedData[d.toIdentificador] = {
+                      data:[],
+                      count:0
+                    };
                   }
-                  parsedResults.push(rData);
-                }
-                return parsedResults;
-              })
-                .then( (data) => {
-                  let reducedData = {};
-                  let mainCount = 0;
-                  data.map( (d) => {
-                    if (!reducedData[d.toIdentificador]) {
-                      reducedData[d.toIdentificador] = {
-                        data:[],
-                        count:0
-                      };
-                    }
-                    reducedData[d.toIdentificador].data.push(d);
-                    reducedData[d.toIdentificador].count += 1;
-                    mainCount += 1;
-                  } )
-                  resolve({results:reducedData, totalTabelas:mainCount});
+                  reducedData[d.toIdentificador].data.push(d);
+                  reducedData[d.toIdentificador].count += 1;
+                  mainCount += 1;
                 } )
-                .catch( (reason) => reject(reason) );
-            }
-            else {
-              resolve({results:{}, totalTabelas:0});
-            }
-          })
-          .catch( (reason) => reject(reason) );
-      });
-    }
+                resolve({results:reducedData, totalTabelas:mainCount});
+              } )
+              .catch( (reason) => reject(reason) );
+          }
+          else {
+            resolve({results:{}, totalTabelas:0});
+          }
+        })
+        .catch( (reason) => reject(reason) );
+    });
   }
 }
 export default new Sistemas();

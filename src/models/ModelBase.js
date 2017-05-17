@@ -12,21 +12,21 @@ class ModelBase {
   ** data - data returned from Neo4J query
   ** return array of returned objects
   */
-  _parseResults(data, parseFunction) {
-    let results = data.results[0].data;
-    let parsedResults = [];
-    results.map((r)=>{
-      if (parseFunction) parsedResults = parseFunction(r,parsedResults);
-      else {
-        if (!r.rest || r.rest.length != 1) return;
-        let rData = r.rest[0].data;
-        rData['id'] = r.rest[0].metadata.id;
-        parsedResults.push(rData);
-        return;
-      }
-    });
-    return parsedResults;
-  }
+  // _parseResults(data, parseFunction) {
+  //   let results = data.results[0].data;
+  //   let parsedResults = [];
+  //   results.map((r)=>{
+  //     if (parseFunction) parsedResults = parseFunction(r,parsedResults);
+  //     else {
+  //       if (!r.rest || r.rest.length != 1) return;
+  //       let rData = r.rest[0].data;
+  //       rData['id'] = r.rest[0].metadata.id;
+  //       parsedResults.push(rData);
+  //       return;
+  //     }
+  //   });
+  //   return parsedResults;
+  // }
 
   /**
   *
@@ -46,27 +46,27 @@ class ModelBase {
   * }
   * return a Promise to retrived data
   */
-  _fetchResults(args, parseFunction) {
-    let mapaInformacaoBaseUrl = this.config.mapaInformacaoBaseUrl;
-    return new Promise( (resolve, reject) => {
-      client.post(mapaInformacaoBaseUrl, args, (data) => {
-        if (data.errors && data.errors.length > 0) {
-          reject(data.errors);
-        }
-        else {
-          if (!data.results || data.results.length != 1 || !data.results[0].data || data.results[0].data.length == 0) {
-            resolve([]);
-          }
-          else {
-            let parsedData = this._parseResults(data, parseFunction);
-            resolve(parsedData);
-          }
-        }
-      }).on('error', (err) => {
-        reject(err);
-      });
-    });
-  }
+  // _fetchResults(args, parseFunction) {
+  //   let mapaInformacaoBaseUrl = this.config.mapaInformacaoBaseUrl;
+  //   return new Promise( (resolve, reject) => {
+  //     client.post(mapaInformacaoBaseUrl, args, (data) => {
+  //       if (data.errors && data.errors.length > 0) {
+  //         reject(data.errors);
+  //       }
+  //       else {
+  //         if (!data.results || data.results.length != 1 || !data.results[0].data || data.results[0].data.length == 0) {
+  //           resolve([]);
+  //         }
+  //         else {
+  //           let parsedData = this._parseResults(data, parseFunction);
+  //           resolve(parsedData);
+  //         }
+  //       }
+  //     }).on('error', (err) => {
+  //       reject(err);
+  //     });
+  //   });
+  // }
 
   /**
   *
@@ -121,28 +121,29 @@ class ModelBase {
    * params statement
    * return a prepared arg object
    */
-   _getArguments(statement) {
-     let args = {
-       data:{
-         statements:[
-           {
-             statement:statement,
-             parameters:{s:0,l:10000},
-             resultDataContents:["REST"]
-           }
-         ]
-       },
-       headers: {"Content-Type": "application/json"}
-     }
-     if (this.config.authentication != "") args.headers.Authorization = this.config.authentication;
-     return args;
-   }
-
+  //  _getArguments(statement) {
+  //    let args = {
+  //      data:{
+  //        statements:[
+  //          {
+  //            statement:statement,
+  //            parameters:{s:0,l:10000},
+  //            resultDataContents:["REST"]
+  //          }
+  //        ]
+  //      },
+  //      headers: {"Content-Type": "application/json"}
+  //    }
+  //    if (this.config.authentication != "") args.headers.Authorization = this.config.authentication;
+  //    return args;
+  //  }
+  setEntityConfig() {}
   /*
   ** auxiliar function to set configurations
   */
   setConfig(config) {
     this.config = config;
+    this.setEntityConfig();
   }
 }
 export default ModelBase;

@@ -1,7 +1,21 @@
 import chai from 'chai';
 import sinon from 'sinon';
+import {MapaInformacaoConnector} from 'base-autoritativa-connectors';
 import Tabelas from '../../src/models/Tabelas';
+
+let config = {
+  "port": 8080,
+	"bodyLimit": "100kb",
+	"corsHeaders": ["Link"],
+	"authentication":"Basic test_test_test",
+	"mapaInformacaoBaseUrl":"http://localhost:7474",
+	"wikiBaseUrl":"http://localhost",
+	"statements":{
+	}
+}
+
 let mockStubs = {
+  getTabela:{},
   _fetchResults: {},
   _getArguments: {},
   _fetchWebApiResults: {}
@@ -9,7 +23,6 @@ let mockStubs = {
 
 let should = chai.should();
 let expect = chai.expect;
-let db = {}, config = {};
 
 let statements = {
   "oneTabela":"MATCH (v:`Tabela`) WHERE (lower(v.`Identificador`) = 'informix.bd_tecn.informix.age' OR lower(v.`Código`) = 'informix.bd_tecn.informix.age' OR lower(v.`Nome`) = 'informix.bd_tecn.informix.age') RETURN v",
@@ -99,6 +112,7 @@ let tabelasResponse = {
 
 describe('Tabelas Model', () => {
   before(() => {
+    Tabelas.setConfig(config);
   });
 
   beforeEach(() => {
@@ -116,74 +130,14 @@ describe('Tabelas Model', () => {
   });
 
   it('should get one tabela', (done) => {
-    let localArgs = {arg1:1,arg2:2};
-    mockStubs._getArguments = sinon.stub(Tabelas,'_getArguments');
-    mockStubs._fetchResults = sinon.stub(Tabelas,'_fetchResults');
-    mockStubs._getArguments.callsFake( (statement) => {
-      statement.should.be.equal(statements['oneTabela']);
-      return localArgs;
-    });
-    mockStubs._fetchResults.callsFake( (args) => {
-      return new Promise( (resolve) => resolve(getTabelaResponse) );
-    });
+    mockStubs.getTabela = sinon.stub(MapaInformacaoConnector.prototype,'getTabela');
+    mockStubs.getTabela.callsFake( () => {return new Promise( (resolve) => resolve(getTabelaResponse) )} );
+
     Tabelas.getTabela(tabelaName).then( (results) => {
-      mockStubs._getArguments.calledOnce.should.be.ok;
-      mockStubs._fetchResults.calledOnce.should.be.ok;
+      mockStubs.getTabela.calledOnce.should.be.ok;
       results.should.be.equal(getTabelaResponse);
-      mockStubs._getArguments.restore();
-      mockStubs._fetchResults.restore();
       done();
     } );
-  });
-
-  it('should handle no tabela name on get one tabela', (done) => {
-    let localArgs = {arg1:1,arg2:2};
-    mockStubs._getArguments = sinon.stub(Tabelas,'_getArguments');
-    mockStubs._fetchResults = sinon.stub(Tabelas,'_fetchResults');
-    mockStubs._getArguments.callsFake( (statement) => {
-      statement.should.be.equal(statements['oneTabela']);
-      return localArgs;
-    });
-    mockStubs._fetchResults.callsFake( (args) => {
-      return new Promise( (resolve) => resolve(getTabelaResponse) );
-    });
-    Tabelas.getTabela().then( (results) => {
-      mockStubs._getArguments.restore();
-      mockStubs._fetchResults.restore();
-      done('Unhandled no tabela name');
-    } ).catch( (reason) => {
-      mockStubs._getArguments.calledOnce.should.be.not.ok;
-      mockStubs._fetchResults.calledOnce.should.be.not.ok;
-      reason.should.be.equal('No Tabela name provided');
-      mockStubs._getArguments.restore();
-      mockStubs._fetchResults.restore();
-      done();
-    } ) ;
-  });
-
-  it('should handle empty tabela name on get one tabela', (done) => {
-    let localArgs = {arg1:1,arg2:2};
-    mockStubs._getArguments = sinon.stub(Tabelas,'_getArguments');
-    mockStubs._fetchResults = sinon.stub(Tabelas,'_fetchResults');
-    mockStubs._getArguments.callsFake( (statement) => {
-      statement.should.be.equal(statements['oneTabela']);
-      return localArgs;
-    });
-    mockStubs._fetchResults.callsFake( (args) => {
-      return new Promise( (resolve) => resolve(getTabelaResponse) );
-    });
-    Tabelas.getTabela('').then( (results) => {
-      mockStubs._getArguments.restore();
-      mockStubs._fetchResults.restore();
-      done('Unhandled no tabela name');
-    } ).catch( (reason) => {
-      mockStubs._getArguments.calledOnce.should.be.not.ok;
-      mockStubs._fetchResults.calledOnce.should.be.not.ok;
-      reason.should.be.equal('No Tabela name provided');
-      mockStubs._getArguments.restore();
-      mockStubs._fetchResults.restore();
-      done();
-    } ) ;
   });
 
   it('should get a list of Tabela de Banco de Dados', (done) => {
