@@ -30,7 +30,21 @@ let getTabelaResponse = {
   "id": 2672961
 };
 
-  let tabelasWikiResponse = {
+let tokenResponse = {
+    "batchcomplete": "",
+    "query": {
+        "tokens": {
+            "csrftoken": "59322ed9a6c171b759070c6b60b5591c591c49f0+\\"
+        }
+    }
+};
+let createResponse = {
+  "edit": {
+    "result":"Success"
+  }
+};
+
+let tabelasWikiResponse = {
   	"query": {
   		"printrequests": [
   			{
@@ -187,6 +201,7 @@ describe('Tabelas Model', () => {
       } );
     });
     Tabelas.getTabelasDeBancoDeDadosLinks().then( (data) => {
+      mockStubs._fetchWebApiResults.calledOnce.should.be.ok;
       data.should.be.deep.equal(tabelasResponse);
       mockStubs._fetchWebApiResults.restore();
       done();
@@ -196,4 +211,226 @@ describe('Tabelas Model', () => {
     } );
   });
 
+  it('should create a list of pages on Tabela de Banco de Dados names', (done) => {
+    mockStubs._fetchWebApiResults = sinon.stub(Tabelas,'_fetchWebApiResults');
+    mockStubs._fetchWebApiResults.callsFake( (statement, validationAttributes, args, verb, parseFunction) => {
+      // First coall to _fetchWebApiResults retorn token
+      if (mockStubs._fetchWebApiResults.callCount == 1) {
+        statement.should.be.equal(statements['get_token']);
+        validationAttributes.should.be.ok;
+        validationAttributes.should.be.a('array');
+        args.should.be.ok;
+        verb.should.be.equal('get');
+        parseFunction.should.be.a('function');
+        return new Promise( (resolve,reject) => {
+          let parsed = parseFunction(tokenResponse);
+          resolve(parsed);
+        } );
+      }
+      else { // Second call to _fetchWebApiResults return processed data
+        let nome = tabelasResponse.tabelas[mockStubs._fetchWebApiResults.callCount - 2];
+        let pageBody = '%7B%7BTemplateTabelaBancoDados%7D%7D%0A%7B%7BTabela+de+Banco+de+Dados%7D%7D%0A';
+        let token = encodeURI(tokenResponse.query.tokens.csrftoken);
+        let stm = statements['create_page'].replace(/__PAGETITLE__/g,nome).replace(/__BODY__/g,pageBody).replace(/__TOKEN__/g,token);
+        statement.should.be.equal(stm);
+        validationAttributes.should.be.ok;
+        validationAttributes.should.be.a('array');
+        args.should.be.ok;
+        verb.should.be.equal('get');
+        parseFunction.should.be.a('function');
+        return new Promise( (resolve,reject) => {
+          let parsed = parseFunction(createResponse);
+          resolve(parsed);
+        } );
+      }
+    });
+    Tabelas.createPageTabelaDeBancoDeDados(tabelasResponse.tabelas).then( (data) => {
+      mockStubs._fetchWebApiResults.callCount.should.be.equal(3);
+      data.should.be.equal('All created');
+      mockStubs._fetchWebApiResults.restore();
+      done();
+    } ).catch( (reason) => {
+      mockStubs._fetchWebApiResults.restore();
+      done(reason)
+    } );
+  });
+
+  it('should handle no nomes list on create a list of pages on Tabela de Banco de Dados names', (done) => {
+    mockStubs._fetchWebApiResults = sinon.stub(Tabelas,'_fetchWebApiResults');
+    mockStubs._fetchWebApiResults.callsFake( (statement, validationAttributes, args, verb, parseFunction) => {
+      // First coall to _fetchWebApiResults retorn token
+      if (mockStubs._fetchWebApiResults.callCount == 1) {
+        statement.should.be.equal(statements['get_token']);
+        validationAttributes.should.be.ok;
+        validationAttributes.should.be.a('array');
+        args.should.be.ok;
+        verb.should.be.equal('get');
+        parseFunction.should.be.a('function');
+        return new Promise( (resolve,reject) => {
+          let parsed = parseFunction(tokenResponse);
+          resolve(parsed);
+        } );
+      }
+      else { // Second call to _fetchWebApiResults return processed data
+        let nome = tabelasResponse.tabelas[mockStubs._fetchWebApiResults.callCount - 2];
+        let pageBody = '%7B%7BTemplateTabelaBancoDados%7D%7D%0A%7B%7BTabela+de+Banco+de+Dados%7D%7D%0A';
+        let token = encodeURI(tokenResponse.query.tokens.csrftoken);
+        let stm = statements['create_page'].replace(/__PAGETITLE__/g,nome).replace(/__BODY__/g,pageBody).replace(/__TOKEN__/g,token);
+        statement.should.be.equal(stm);
+        validationAttributes.should.be.ok;
+        validationAttributes.should.be.a('array');
+        args.should.be.ok;
+        verb.should.be.equal('get');
+        parseFunction.should.be.a('function');
+        return new Promise( (resolve,reject) => {
+          let parsed = parseFunction(createResponse);
+          resolve(parsed);
+        } );
+      }
+    });
+    Tabelas.createPageTabelaDeBancoDeDados().then( (data) => {
+      mockStubs._fetchWebApiResults.restore();
+      done('Unhandled exception');
+    } ).catch( (reason) => {
+      mockStubs._fetchWebApiResults.callCount.should.be.equal(0);
+      reason.should.be.equal('Invalid list of tabelas names');
+      mockStubs._fetchWebApiResults.restore();
+      done();
+    } );
+  });
+
+  it('should handle empty nomes list on create a list of pages on Tabela de Banco de Dados names', (done) => {
+    mockStubs._fetchWebApiResults = sinon.stub(Tabelas,'_fetchWebApiResults');
+    mockStubs._fetchWebApiResults.callsFake( (statement, validationAttributes, args, verb, parseFunction) => {
+      // First coall to _fetchWebApiResults retorn token
+      if (mockStubs._fetchWebApiResults.callCount == 1) {
+        statement.should.be.equal(statements['get_token']);
+        validationAttributes.should.be.ok;
+        validationAttributes.should.be.a('array');
+        args.should.be.ok;
+        verb.should.be.equal('get');
+        parseFunction.should.be.a('function');
+        return new Promise( (resolve,reject) => {
+          let parsed = parseFunction(tokenResponse);
+          resolve(parsed);
+        } );
+      }
+      else { // Second call to _fetchWebApiResults return processed data
+        let nome = tabelasResponse.tabelas[mockStubs._fetchWebApiResults.callCount - 2];
+        let pageBody = '%7B%7BTemplateTabelaBancoDados%7D%7D%0A%7B%7BTabela+de+Banco+de+Dados%7D%7D%0A';
+        let token = encodeURI(tokenResponse.query.tokens.csrftoken);
+        let stm = statements['create_page'].replace(/__PAGETITLE__/g,nome).replace(/__BODY__/g,pageBody).replace(/__TOKEN__/g,token);
+        statement.should.be.equal(stm);
+        validationAttributes.should.be.ok;
+        validationAttributes.should.be.a('array');
+        args.should.be.ok;
+        verb.should.be.equal('get');
+        parseFunction.should.be.a('function');
+        return new Promise( (resolve,reject) => {
+          let parsed = parseFunction(createResponse);
+          resolve(parsed);
+        } );
+      }
+    });
+    Tabelas.createPageTabelaDeBancoDeDados([]).then( (data) => {
+      mockStubs._fetchWebApiResults.restore();
+      done('Unhandled exception');
+    } ).catch( (reason) => {
+      mockStubs._fetchWebApiResults.callCount.should.be.equal(0);
+      reason.should.be.equal('Invalid list of tabelas names');
+      mockStubs._fetchWebApiResults.restore();
+      done();
+    } );
+  });
+
+  it('should handle error on get token on create a list of pages on Tabela de Banco de Dados names', (done) => {
+    mockStubs._fetchWebApiResults = sinon.stub(Tabelas,'_fetchWebApiResults');
+    mockStubs._fetchWebApiResults.callsFake( (statement, validationAttributes, args, verb, parseFunction) => {
+      // First coall to _fetchWebApiResults retorn token
+      if (mockStubs._fetchWebApiResults.callCount == 1) {
+        statement.should.be.equal(statements['get_token']);
+        validationAttributes.should.be.ok;
+        validationAttributes.should.be.a('array');
+        args.should.be.ok;
+        verb.should.be.equal('get');
+        parseFunction.should.be.a('function');
+        return new Promise( (resolve,reject) => {
+          reject('Could not get Authorization Token');
+        } );
+      }
+      else { // Second call to _fetchWebApiResults return processed data
+        let nome = tabelasResponse.tabelas[mockStubs._fetchWebApiResults.callCount - 2];
+        let pageBody = '%7B%7BTemplateTabelaBancoDados%7D%7D%0A%7B%7BTabela+de+Banco+de+Dados%7D%7D%0A';
+        let token = encodeURI(tokenResponse.query.tokens.csrftoken);
+        let stm = statements['create_page'].replace(/__PAGETITLE__/g,nome).replace(/__BODY__/g,pageBody).replace(/__TOKEN__/g,token);
+        statement.should.be.equal(stm);
+        validationAttributes.should.be.ok;
+        validationAttributes.should.be.a('array');
+        args.should.be.ok;
+        verb.should.be.equal('get');
+        parseFunction.should.be.a('function');
+        return new Promise( (resolve,reject) => {
+          let parsed = parseFunction(createResponse);
+          resolve(parsed);
+        } );
+      }
+    });
+    Tabelas.createPageTabelaDeBancoDeDados(tabelasResponse.tabelas).then( (data) => {
+      mockStubs._fetchWebApiResults.restore();
+      done('Unhandled exception');
+    } ).catch( (reason) => {
+      mockStubs._fetchWebApiResults.callCount.should.be.equal(1);
+      reason.should.be.equal('Could not get Authorization Token');
+      mockStubs._fetchWebApiResults.restore();
+      done();
+    } );
+  });
+
+  it('should handle Failure on create a list of pages on Tabela de Banco de Dados names', (done) => {
+    mockStubs._fetchWebApiResults = sinon.stub(Tabelas,'_fetchWebApiResults');
+    mockStubs._fetchWebApiResults.callsFake( (statement, validationAttributes, args, verb, parseFunction) => {
+      // First coall to _fetchWebApiResults retorn token
+      if (mockStubs._fetchWebApiResults.callCount == 1) {
+        statement.should.be.equal(statements['get_token']);
+        validationAttributes.should.be.ok;
+        validationAttributes.should.be.a('array');
+        args.should.be.ok;
+        verb.should.be.equal('get');
+        parseFunction.should.be.a('function');
+        return new Promise( (resolve,reject) => {
+          let parsed = parseFunction(tokenResponse);
+          resolve(parsed);
+        } );
+      }
+      else { // Second call to _fetchWebApiResults return processed data
+        let nome = tabelasResponse.tabelas[mockStubs._fetchWebApiResults.callCount - 2];
+        let pageBody = '%7B%7BTemplateTabelaBancoDados%7D%7D%0A%7B%7BTabela+de+Banco+de+Dados%7D%7D%0A';
+        let token = encodeURI(tokenResponse.query.tokens.csrftoken);
+        let stm = statements['create_page'].replace(/__PAGETITLE__/g,nome).replace(/__BODY__/g,pageBody).replace(/__TOKEN__/g,token);
+        statement.should.be.equal(stm);
+        validationAttributes.should.be.ok;
+        validationAttributes.should.be.a('array');
+        args.should.be.ok;
+        verb.should.be.equal('get');
+        parseFunction.should.be.a('function');
+        return new Promise( (resolve,reject) => {
+          let response = JSON.parse(JSON.stringify(createResponse));
+          if (mockStubs._fetchWebApiResults.callCount == 3) response.edit.result = 'Failure';
+          let parsed = parseFunction(response);
+          resolve(parsed);
+        } );
+      }
+    });
+    Tabelas.createPageTabelaDeBancoDeDados(tabelasResponse.tabelas).then( (data) => {
+      mockStubs._fetchWebApiResults.restore();
+      done('Unhandled exception');
+    } ).catch( (reason) => {
+      mockStubs._fetchWebApiResults.callCount.should.be.equal(3);
+      reason.should.be.a('array');
+      reason.length.should.be.equal(1);
+      reason[0].should.be.deep.equal({ message: 'Error on creation of page', arguments: 'Informix.bd tecn.informix.cos'});
+      mockStubs._fetchWebApiResults.restore();
+      done();
+    } );
+  });
 });

@@ -59,29 +59,38 @@ class Tabelas extends ModelBase{
     createPageTabelaDeBancoDeDados(nomes) {
       let promises = [];
       let statement = this.statements['get_token'];
-      let pageBody = '%7B%7BTemplateTabelaBancoDados%7D%7D%0A%7B%7BTabela+de+Banco+de+Dados%7D%7D%0A'
+      let pageBody = '%7B%7BTemplateTabelaBancoDados%7D%7D%0A%7B%7BTabela+de+Banco+de+Dados%7D%7D%0A';
       return new Promise( (resolve,reject) => {
-        this._fetchWebApiResults(statement,['query','tokens','csrftoken'],{},'get',(data) => {
-          return encodeURI(data.query.tokens.csrftoken);
-        }).then(token => {
-          let i = 1;
-          let total = nomes.length;
-          nomes.forEach((item) => {
-            statement = this.statement['create_page'].replace(/__PAGETITLE__/g,item).replace(/__BODY__/g,pageBody).replace(/__TOKEN__/g,token);
-            let promise = this._fetchWebApiResults(statement,['edit','result'],{},'get',(data) => {
-              console.log('Processed ' + i + ' of ' + total);
-              i++;
-              return data.edit.result;
+        if (!nomes || nomes.length == 0) reject('Invalid list of tabelas names');
+        else {
+          this._fetchWebApiResults(statement,['query','tokens','csrftoken'],{},'get',(data) => {
+            return encodeURI(data.query.tokens.csrftoken);
+          }).then(token => {
+            let i = 1;
+            let total = nomes.length;
+            nomes.forEach((item) => {
+              statement = this.statements['create_page'].replace(/__PAGETITLE__/g,item).replace(/__BODY__/g,pageBody).replace(/__TOKEN__/g,token);
+              let promise = this._fetchWebApiResults(statement,['edit','result'],{},'get',(data) => {
+                console.log('Processed ' + i + ' of ' + total);
+                i++;
+                return {nome: item, result: data.edit.result};
+              });
+              promises.push(promise);
             });
-            promises.push(promise);
+            Promise.all(promises).then((data)=>{
+              let rejectItems = [];
+              data.forEach( (item) => {
+                if (item.result == 'Failure') {
+                  rejectItems.push({ message: 'Error on creation of page', arguments: item.nome});
+                }
+              } )
+              if (rejectItems.length > 0) reject(rejectItems);
+              else resolve('All created');
+            }).catch((reason) => reject('Error in creation'));
+          }).catch(reason => {
+            reject(reason);
           });
-          Promise.all(promises).then((data)=>{
-            if (data.includes('Failure')) reject('Error in creation');
-            else resolve('All created');
-          }).catch((reason) => reject('Error in creation'));
-        }).catch(reason => {
-          reject(reason);
-        });
+        }
       });
     }
 }
