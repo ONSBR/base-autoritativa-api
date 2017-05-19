@@ -7,8 +7,24 @@ let extraFunctions = {
     verb:'get',
     action:({params},res) => {
       Tabelas.getTabelasDeBancoDeDadosLinks()
-        .then( (data) => res.json(data) )
+        .then( (data) => res.json(data.data) )
         .catch( (reason) => res.status(400).send(reason) );
+    }
+  },
+  create_pages_tabelas_de_banco_de_dados:{
+    verb:'get',
+    action:(req,res) => {
+      Tabelas.getTabelasDeBancoDeDadosLinks()
+        .then( (data) => {
+          if (!data || !data.data || data.data.length == 0) res.json({status:'Success',data:[]});
+          else {
+            let tabelas = data.data.tabelas;
+            Tabelas.createPageTabelaDeBancoDeDados(tabelas)
+              .then( (data) => res.json(data))
+              .catch( (reason) => res.status(400).send(reason));
+          }
+        })
+        .catch( (reason) => res.status(400).send(reason));
     }
   }
 }
