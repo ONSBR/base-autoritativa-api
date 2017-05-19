@@ -15,7 +15,8 @@ let mockStubs = {
   read: {},
   users: {},
   tables: {},
-  tabelas_de_banco_de_dados: {}
+  tabelas_de_banco_de_dados: {},
+  create_pages_tabelas_de_banco_de_dados: {}
 };
 
 import Api from '../../src/api';
@@ -154,6 +155,19 @@ describe('base-autoritativa-api', () => {
     router.handle({ url: '/bulkcreate/tabelas_de_banco_de_dados', method: 'GET' }, {end:() => {return}}, () => {
       mockStubs.tabelas_de_banco_de_dados.calledOnce.should.be.ok;
       mockStubs.tabelas_de_banco_de_dados.restore();
+      done();
+    });
+  });
+
+  it('should call bulkcreate api module function from /bulkcreate/create_pages_tabelas_de_banco_de_dados', (done) => {
+    mockStubs.create_pages_tabelas_de_banco_de_dados = sinon.stub(bulkcreate.extraFunctions.create_pages_tabelas_de_banco_de_dados,'action');
+    mockStubs.create_pages_tabelas_de_banco_de_dados.callsFake((req,res) => {
+      return res.json({})
+    });
+    let router = Api({ config, db });
+    router.handle({ url: '/bulkcreate/create_pages_tabelas_de_banco_de_dados', method: 'GET' }, {end:() => {return}}, () => {
+      mockStubs.create_pages_tabelas_de_banco_de_dados.calledOnce.should.be.ok;
+      mockStubs.create_pages_tabelas_de_banco_de_dados.restore();
       done();
     });
   });
