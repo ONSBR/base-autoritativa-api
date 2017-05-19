@@ -131,11 +131,11 @@ describe('Tabelas Model', () => {
 
   it('should get one tabela', (done) => {
     mockStubs.getTabela = sinon.stub(MapaInformacaoConnector.prototype,'getTabela');
-    mockStubs.getTabela.callsFake( () => {return new Promise( (resolve) => resolve(getTabelaResponse) )} );
+    mockStubs.getTabela.callsFake( () => {return new Promise( (resolve) => resolve({status:'Success',data:getTabelaResponse}) )} );
 
     Tabelas.getTabela(tabelaName).then( (results) => {
       mockStubs.getTabela.calledOnce.should.be.ok;
-      results.should.be.equal(getTabelaResponse);
+      results.should.be.deep.equal({status:'Success',data:getTabelaResponse});
       done();
     } );
   });

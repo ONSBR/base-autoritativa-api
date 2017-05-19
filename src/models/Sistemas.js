@@ -16,7 +16,7 @@ class Sistemas extends ModelBase {
   * return a Promise to retrived data
   */
   getAll() {
-    return this.mapaInformacaoConnector.getAllSistemas(); 
+    return this.mapaInformacaoConnector.getAllSistemas();
   }
 
   /**
@@ -54,33 +54,37 @@ class Sistemas extends ModelBase {
       this.mapaInformacaoConnector.getAllSistemaDbUsers(sistema)
         .then( (userData) => {
           let userCodes = '';
-          userData.map( (u) => {
-            userCodes += (u.id + ',');
-          });
-
-          if (userCodes != '') {
-            userCodes = userCodes.slice(0,-1);
-            this.mapaInformacaoConnector.getTablesReadByUser(userCodes)
-              .then( (data) => {
-                let reducedData = {};
-                let mainCount = 0;
-                data.map( (d) => {
-                  if (!reducedData[d.toIdentificador]) {
-                    reducedData[d.toIdentificador] = {
-                      data:[],
-                      count:0
-                    };
-                  }
-                  reducedData[d.toIdentificador].data.push(d);
-                  reducedData[d.toIdentificador].count += 1;
-                  mainCount += 1;
-                } )
-                resolve({results:reducedData, totalTabelas:mainCount});
-              } )
-              .catch( (reason) => reject(reason) );
-          }
+          if (!userData || userData.status == 'Failure' || !userData.data) reject(userData);
           else {
-            resolve({results:{}, totalTabelas:0});
+            userData.data.forEach( (u) => {
+              userCodes += (u.id + ',');
+            });
+
+            if (userCodes != '') {
+              userCodes = userCodes.slice(0,-1);
+              this.mapaInformacaoConnector.getTablesReadByUser(userCodes)
+                .then( (data) => {
+                  let reducedData = {};
+                  let mainCount = 0;
+                  if (!data || data.status == 'Failure' || !data.data) reject(data);
+                  data.data.map( (d) => {
+                    if (!reducedData[d.toIdentificador]) {
+                      reducedData[d.toIdentificador] = {
+                        data:[],
+                        count:0
+                      };
+                    }
+                    reducedData[d.toIdentificador].data.push(d);
+                    reducedData[d.toIdentificador].count += 1;
+                    mainCount += 1;
+                  } )
+                  resolve({status:'Success',data:{results:reducedData, totalTabelas:mainCount}});
+                } )
+                .catch( (reason) => reject(reason) );
+            }
+            else {
+              resolve({status:'Success',data:{results:{}, totalTabelas:0}});
+            }
           }
         })
         .catch( (reason) => reject(reason) );

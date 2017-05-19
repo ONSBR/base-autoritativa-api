@@ -28,14 +28,14 @@ let generalFunctions = {
    */
   load(req, id, callback) {
     Sistemas.getSistema(id)
-      .then( (data) => callback(null, data[0]) )
+      .then( (data) => callback(null, data.data[0]) )
       .catch( (reason) => callback(reason) );
   },
 
   /** GET / - List all entities */
   index({ params }, res) {
     Sistemas.getAll()
-      .then( (data) => res.json(data) )
+      .then( (data) => res.json(data.data) )
       .catch( (reason) => res.status(400).send(reason) );
   },
 
@@ -51,11 +51,11 @@ let extraFunctions = {
       let sistema = params.sistema;
       if (sistema && sistema.length > 0) {
         Sistemas.getAllSistemaDbUsers(sistema)
-          .then( (data) => res.json(data) )
+          .then( (data) => res.json(data.data) )
           .catch( (reason) => res.status(400).send(reason) );
       }
       else {
-        res.status(400).send({message:'Invalid sistema param'});
+        res.status(400).send({status:'Failure',data:{message:'Invalid sistema param'}});
       }
     }
   },
@@ -67,9 +67,9 @@ let extraFunctions = {
       if (sistema && sistema.length > 0) {
         Sistemas.getTablesReadBySistema(sistema)
           .then( (data) => {
-            let result = data;
+            let result = data.data;
             if (format && 'csv' == format.toLowerCase()) {
-              result = transformTablesJson2CSV(data);
+              result = transformTablesJson2CSV(data.data);
               res.status(200).send(result);
             }
             else res.json(result);
@@ -77,7 +77,7 @@ let extraFunctions = {
           .catch( (reason) => res.status(400).send(reason) );
       }
       else {
-        res.status(400).send({message:'Invalid sistema param'});
+        res.status(400).send({status:'Failure',data:{message:'Invalid sistema param'}});
       }
     }
   }

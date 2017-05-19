@@ -89,7 +89,7 @@ describe('sistemas handler', () => {
 
   it('should list sistemas', (done) => {
     mockStubs.getAll = sinon.stub(Sistemas,'getAll');
-    mockStubs.getAll.callsFake(() => {return new Promise((resolve) => resolve(getAllResponse))});
+    mockStubs.getAll.callsFake(() => {return new Promise((resolve) => resolve({status:'Success',data:getAllResponse}))});
     sistemas.generalFunctions.index({params:'test'},{
       json:(data) => {
         mockStubs.getAll.calledOnce.should.be.ok;
@@ -98,14 +98,14 @@ describe('sistemas handler', () => {
         done();
       },
       status: (errCode) => {
-        return {send:(reason)=>{done('Error')}};
+        return {send:(reason)=>{done(reason)}};
       }
     });
   });
 
   it('should return system errors on list sistemas', (done) => {
     mockStubs.getAll = sinon.stub(Sistemas,'getAll');
-    mockStubs.getAll.callsFake(() => {return new Promise((resolve, reject) => reject('error'))});
+    mockStubs.getAll.callsFake(() => {return new Promise((resolve, reject) => reject({status:'Failure',data:'error'}))});
     sistemas.generalFunctions.index({params:'test'},{
       json:(data) => {
         mockStubs.getAll.restore();
@@ -116,7 +116,7 @@ describe('sistemas handler', () => {
           send:(reason)=>{
             mockStubs.getAll.calledOnce.should.be.ok;
             errCode.should.be.equal(400);
-            reason.should.be.equal('error');
+            reason.should.be.deep.equal({status:'Failure',data:'error'});
             mockStubs.getAll.restore();
             done();
           }};
@@ -127,7 +127,7 @@ describe('sistemas handler', () => {
   it('should load one sistema', (done) => {
       mockStubs.getSistema = sinon.stub(Sistemas,'getSistema');
       mockStubs.getSistema.callsFake( () => {
-        return new Promise( (resolve) => resolve([getAllResponse[0]]));
+        return new Promise( (resolve) => resolve({status:'Success',data:[getAllResponse[0]]}));
       });
       sistemas.generalFunctions.load({params:'test'},1,(err,data) => {
         mockStubs.getSistema.calledOnce.should.be.ok;
@@ -141,11 +141,11 @@ describe('sistemas handler', () => {
   it('should handle error on load one sistema', (done) => {
     mockStubs.getSistema = sinon.stub(Sistemas,'getSistema');
     mockStubs.getSistema.callsFake( () => {
-      return new Promise( (resolve,reject) => reject('error'));
+      return new Promise( (resolve,reject) => reject({status:'Failure',data:'error'}));
     });
     sistemas.generalFunctions.load({params:'test'},1,(err,data) => {
       mockStubs.getSistema.calledOnce.should.be.ok;
-      err.should.be.equal('error');
+      err.should.be.deep.equal({status:'Failure',data:'error'});
       should.not.exist(data);
       mockStubs.getSistema.restore();
       done();
@@ -163,7 +163,7 @@ describe('sistemas handler', () => {
   it('should return a list of users of a sistema', (done) => {
     mockStubs.getAllSistemaDbUsers = sinon.stub(Sistemas,'getAllSistemaDbUsers');
     mockStubs.getAllSistemaDbUsers.callsFake( () => {
-      return new Promise( (resolve) => resolve(getAllResponse));
+      return new Promise( (resolve) => resolve({status:'Success',data:getAllResponse}));
     });
     sistemas.extraFunctions.users.action({params:{sistema:'test'}}, {
       json:(data) => {
@@ -183,7 +183,7 @@ describe('sistemas handler', () => {
   it('should handle no sistema name for a list of users of a sistema', (done) => {
     mockStubs.getAllSistemaDbUsers = sinon.stub(Sistemas,'getAllSistemaDbUsers');
     mockStubs.getAllSistemaDbUsers.callsFake( () => {
-      return new Promise( (resolve) => resolve(getAllResponse));
+      return new Promise( (resolve) => resolve({status:'Success',data:getAllResponse}));
     });
     sistemas.extraFunctions.users.action({params:{}}, {
       json:(data) => {
@@ -196,7 +196,7 @@ describe('sistemas handler', () => {
             mockStubs.getAllSistemaDbUsers.calledOnce.should.not.be.ok;
             errCode.should.be.equal(400);
             reason.should.be.ok;
-            reason.message.should.be.equal('Invalid sistema param');
+            reason.should.be.deep.equal({status:'Failure',data:{message:'Invalid sistema param'}});
             mockStubs.getAllSistemaDbUsers.restore();
             done();
           }};
@@ -206,7 +206,7 @@ describe('sistemas handler', () => {
   it('should handle empty sistema name for a list of users of sistema', (done) => {
     mockStubs.getAllSistemaDbUsers = sinon.stub(Sistemas,'getAllSistemaDbUsers');
     mockStubs.getAllSistemaDbUsers.callsFake( () => {
-      return new Promise( (resolve) => resolve(getAllResponse));
+      return new Promise( (resolve) => resolve({status:'Success',data:getAllResponse}));
     });
     sistemas.extraFunctions.users.action({params:{sistema:''}}, {
       json:(data) => {
@@ -219,7 +219,7 @@ describe('sistemas handler', () => {
             mockStubs.getAllSistemaDbUsers.calledOnce.should.not.be.ok;
             errCode.should.be.equal(400);
             reason.should.be.ok;
-            reason.message.should.be.equal('Invalid sistema param');
+            reason.should.be.deep.equal({status:'Failure',data:{message:'Invalid sistema param'}});
             mockStubs.getAllSistemaDbUsers.restore();
             done();
           }};
@@ -229,7 +229,7 @@ describe('sistemas handler', () => {
   it('should handle error for list of users of sistema', (done) => {
     mockStubs.getAllSistemaDbUsers = sinon.stub(Sistemas,'getAllSistemaDbUsers');
     mockStubs.getAllSistemaDbUsers.callsFake( () => {
-      return new Promise( (resolve, reject) => reject('error'));
+      return new Promise( (resolve, reject) => reject({status:'Failure',data:'error'}));
     });
     sistemas.extraFunctions.users.action({params:{sistema:'test'}}, {
       json:(data) => {
@@ -241,7 +241,7 @@ describe('sistemas handler', () => {
           send:(reason)=>{
             mockStubs.getAllSistemaDbUsers.calledOnce.should.be.ok;
             errCode.should.be.equal(400);
-            reason.should.be.equal('error');
+            reason.should.be.deep.equal({status:'Failure',data:'error'});
             mockStubs.getAllSistemaDbUsers.restore();
             done();
           }};
@@ -251,7 +251,7 @@ describe('sistemas handler', () => {
   it('should return a list of tabelas read by sistema', (done) => {
     mockStubs.getTablesReadBySistema = sinon.stub(Sistemas,'getTablesReadBySistema');
     mockStubs.getTablesReadBySistema.callsFake( () => {
-      return new Promise( (resolve) => resolve(getAllResponse));
+      return new Promise( (resolve) => resolve({status:'Success',data:getAllResponse}));
     });
     sistemas.extraFunctions.tables.action({params:{sistema:'test'},query:{}}, {
       json:(data) => {
@@ -272,7 +272,7 @@ describe('sistemas handler', () => {
   it('should handle no sistema name for a list of tabelas read by sistema', (done) => {
     mockStubs.getTablesReadBySistema = sinon.stub(Sistemas,'getTablesReadBySistema');
     mockStubs.getTablesReadBySistema.callsFake( () => {
-      return new Promise( (resolve) => resolve(getAllResponse));
+      return new Promise( (resolve) => resolve({status:'Success',data:getAllResponse}));
     });
     sistemas.extraFunctions.tables.action({params:{},query:{}}, {
       json:(data) => {
@@ -285,7 +285,7 @@ describe('sistemas handler', () => {
             mockStubs.getTablesReadBySistema.calledOnce.should.not.be.ok;
             errCode.should.be.equal(400);
             reason.should.be.ok;
-            reason.message.should.be.equal('Invalid sistema param');
+            reason.should.be.deep.equal({status:'Failure',data:{message:'Invalid sistema param'}});
             mockStubs.getTablesReadBySistema.restore();
             done();
           }};
@@ -295,7 +295,7 @@ describe('sistemas handler', () => {
   it('should handle empty sistema name for a list of tabelas read by sistema', (done) => {
     mockStubs.getTablesReadBySistema = sinon.stub(Sistemas,'getTablesReadBySistema');
     mockStubs.getTablesReadBySistema.callsFake( () => {
-      return new Promise( (resolve) => resolve(getAllResponse));
+      return new Promise( (resolve) => resolve({status:'Success',data:getAllResponse}));
     });
     sistemas.extraFunctions.tables.action({params:{sistema:''},query:{}}, {
       json:(data) => {
@@ -308,7 +308,7 @@ describe('sistemas handler', () => {
             mockStubs.getTablesReadBySistema.calledOnce.should.not.be.ok;
             errCode.should.be.equal(400);
             reason.should.be.ok;
-            reason.message.should.be.equal('Invalid sistema param');
+            reason.should.be.deep.equal({status:'Failure',data:{message:'Invalid sistema param'}});
             mockStubs.getTablesReadBySistema.restore();
             done();
           }};
@@ -318,7 +318,7 @@ describe('sistemas handler', () => {
   it('should handle an error for a list of tabelas read by sistema', (done) => {
     mockStubs.getTablesReadBySistema = sinon.stub(Sistemas,'getTablesReadBySistema');
     mockStubs.getTablesReadBySistema.callsFake( () => {
-      return new Promise( (resolve, reject) => reject('error'));
+      return new Promise( (resolve, reject) => reject({status:'Failure',data:'error'}));
     });
     sistemas.extraFunctions.tables.action({params:{sistema:'test'},query:{}}, {
       json:(data) => {
@@ -330,7 +330,7 @@ describe('sistemas handler', () => {
           send:(reason)=>{
             mockStubs.getTablesReadBySistema.calledOnce.should.be.ok;
             errCode.should.be.equal(400);
-            reason.should.be.equal('error');
+            reason.should.be.deep.equal({status:'Failure',data:'error'});
             mockStubs.getTablesReadBySistema.restore();
             done();
           }};
@@ -340,7 +340,7 @@ describe('sistemas handler', () => {
   it('should return a csv file of a list of tabelas read by sistema', (done) => {
     mockStubs.getTablesReadBySistema = sinon.stub(Sistemas,'getTablesReadBySistema');
     mockStubs.getTablesReadBySistema.callsFake( () => {
-      return new Promise( (resolve) => resolve(getAllTabelasResponse));
+      return new Promise( (resolve) => resolve({status:'Success',data:getAllTabelasResponse}));
     });
     sistemas.extraFunctions.tables.action({params:{sistema:'test'},query:{format:'csv'}}, {
       json:(data) => {
@@ -362,7 +362,7 @@ describe('sistemas handler', () => {
   it('should return a json of a list of tabelas read by sistema', (done) => {
     mockStubs.getTablesReadBySistema = sinon.stub(Sistemas,'getTablesReadBySistema');
     mockStubs.getTablesReadBySistema.callsFake( () => {
-      return new Promise( (resolve) => resolve(getAllResponse));
+      return new Promise( (resolve) => resolve({status:'Success',data:getAllResponse}));
     });
     sistemas.extraFunctions.tables.action({params:{sistema:'test'},query:{format:'cs'}}, {
       json:(data) => {

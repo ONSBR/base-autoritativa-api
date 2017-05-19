@@ -22,7 +22,7 @@ let generalFunctions = {
    */
   load(req, id, callback) {
     Tabelas.getTabela(id)
-      .then( (data) => callback(null, data[0]) )
+      .then( (data) => callback(null, data.data[0]) )
       .catch( (reason) => callback(reason) );
   },
 

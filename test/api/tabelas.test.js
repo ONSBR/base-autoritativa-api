@@ -44,7 +44,7 @@ describe('tabelas handler', () => {
   it('should load one tabela', (done) => {
       mockStubs.getTabela = sinon.stub(Tabelas,'getTabela');
       mockStubs.getTabela.callsFake( () => {
-        return new Promise( (resolve) => resolve([getTabelaResponse]));
+        return new Promise( (resolve) => resolve({status:'Success',data:[getTabelaResponse]}));
       });
       tabelas.generalFunctions.load({params:'test'},'informix.bd_tecn.informix.age',(err,data) => {
         mockStubs.getTabela.calledOnce.should.be.ok;
@@ -58,11 +58,11 @@ describe('tabelas handler', () => {
   it('should handle error on load one sistema', (done) => {
     mockStubs.getTabela = sinon.stub(Tabelas,'getTabela');
     mockStubs.getTabela.callsFake( () => {
-      return new Promise( (resolve,reject) => reject('error'));
+      return new Promise( (resolve,reject) => reject({status:'Failure',data:'error'}));
     });
     tabelas.generalFunctions.load({params:'test'},'informix.bd_tecn.informix.age',(err,data) => {
       mockStubs.getTabela.calledOnce.should.be.ok;
-      err.should.be.equal('error');
+      err.should.be.deep.equal({status:'Failure',data:'error'});
       should.not.exist(data);
       mockStubs.getTabela.restore();
       done();
@@ -73,7 +73,7 @@ describe('tabelas handler', () => {
       json: sinon.spy()
     }
     tabelas.generalFunctions.read({tabela:getTabelaResponse,query:{}}, res);
-    res.json.calledOnce.should.be.ok; 
+    res.json.calledOnce.should.be.ok;
     res.json.calledWith(getTabelaResponse).should.be.ok;
     done();
   });

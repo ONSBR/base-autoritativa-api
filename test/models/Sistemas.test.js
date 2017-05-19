@@ -84,11 +84,11 @@ describe('Sistemas Model', () => {
 
   it('should list all Sistemas', (done) => {
     mockStubs.getAllSistemas = sinon.stub(MapaInformacaoConnector.prototype,'getAllSistemas');
-    mockStubs.getAllSistemas.callsFake( () => {return new Promise( (resolve) => resolve(allResponse) )} );
+    mockStubs.getAllSistemas.callsFake( () => {return new Promise( (resolve) => resolve({status:'Success',data:allResponse}) )} );
 
     Sistemas.getAll().then( (data) => {
       mockStubs.getAllSistemas.calledOnce.should.be.ok;
-      data.should.be.deep.equal(allResponse);
+      data.should.be.deep.equal({status:'Success',data:allResponse});
       done();
     } ).catch( (reason) => {
       done(reason);
@@ -97,11 +97,11 @@ describe('Sistemas Model', () => {
 
   it('should get a sistema', (done) => {
     mockStubs.getSistema = sinon.stub(MapaInformacaoConnector.prototype,'getSistema');
-    mockStubs.getSistema.callsFake( () => {return new Promise( (resolve) => resolve(allResponse[0]) )} );
+    mockStubs.getSistema.callsFake( () => {return new Promise( (resolve) => resolve({status:'Success',data:allResponse[0]}) )} );
 
     Sistemas.getSistema('Test1').then( (data) => {
       mockStubs.getSistema.calledOnce.should.be.ok;
-      data.should.be.deep.equal(allResponse[0]);
+      data.should.be.deep.equal({status:'Success',data:allResponse[0]});
       done();
     } ).catch( (reason) => {
       done(reason);
@@ -110,11 +110,11 @@ describe('Sistemas Model', () => {
 
   it('should get all db users of a sistema', (done) => {
     mockStubs.getAllSistemaDbUsers = sinon.stub(MapaInformacaoConnector.prototype,'getAllSistemaDbUsers');
-    mockStubs.getAllSistemaDbUsers.callsFake( () => {return new Promise( (resolve) => resolve(allResponse) )} );
+    mockStubs.getAllSistemaDbUsers.callsFake( () => {return new Promise( (resolve) => resolve({status:'Success',data:allResponse}) )} );
 
     Sistemas.getAllSistemaDbUsers('Test1').then( (data) => {
       mockStubs.getAllSistemaDbUsers.calledOnce.should.be.ok;
-      data.should.be.deep.equal(allResponse);
+      data.should.be.deep.equal({status:'Success',data:allResponse});
       done();
     } ).catch( (reason) => {
       done(reason);
@@ -123,16 +123,17 @@ describe('Sistemas Model', () => {
 
   it('should list tabelas read by Sistema', (done) => {
     mockStubs.getAllSistemaDbUsers = sinon.stub(MapaInformacaoConnector.prototype,'getAllSistemaDbUsers');
-    mockStubs.getAllSistemaDbUsers.callsFake( () => {return new Promise( (resolve) => resolve(allResponse) )} );
+    mockStubs.getAllSistemaDbUsers.callsFake( () => {return new Promise( (resolve) => resolve({status:'Success',data:allResponse}) )} );
     mockStubs.getTablesReadByUser = sinon.stub(MapaInformacaoConnector.prototype,'getTablesReadByUser');
-    mockStubs.getTablesReadByUser.callsFake( () => {return new Promise( (resolve) => resolve(tabelasParsedResults) )} );
+    mockStubs.getTablesReadByUser.callsFake( () => {return new Promise( (resolve) => resolve({status:'Success',data:tabelasParsedResults}) )} );
 
     Sistemas.getTablesReadBySistema('Test1').then( (data) => {
       mockStubs.getAllSistemaDbUsers.calledOnce.should.be.ok;
       mockStubs.getTablesReadByUser.calledOnce.should.be.ok;
       data.should.be.ok;
-      data.totalTabelas.should.be.equal(totalTabelasReadBySistema);
-      data.results.should.be.deep.equal(tabelasReadbySistemaResponse);
+      data.status.should.be.equal('Success');
+      data.data.totalTabelas.should.be.equal(totalTabelasReadBySistema);
+      data.data.results.should.be.deep.equal(tabelasReadbySistemaResponse);
       done();
     } ).catch( (reason) => {
       done(reason);
@@ -141,46 +142,46 @@ describe('Sistemas Model', () => {
 
   it('should handle no sistema name on tabelas read by Sistema', (done) => {
     mockStubs.getAllSistemaDbUsers = sinon.stub(MapaInformacaoConnector.prototype,'getAllSistemaDbUsers');
-    mockStubs.getAllSistemaDbUsers.callsFake( () => {return new Promise( (resolve,reject) => reject('No Sistema name provided') )} );
+    mockStubs.getAllSistemaDbUsers.callsFake( () => {return new Promise( (resolve,reject) => reject({status:'Failure',data:'No Sistema name provided'}) )} );
     mockStubs.getTablesReadByUser = sinon.stub(MapaInformacaoConnector.prototype,'getTablesReadByUser');
-    mockStubs.getTablesReadByUser.callsFake( () => {return new Promise( (resolve) => resolve(tabelasParsedResults) )} );
+    mockStubs.getTablesReadByUser.callsFake( () => {return new Promise( (resolve) => resolve({status:'Success',data:tabelasParsedResults}) )} );
 
     Sistemas.getTablesReadBySistema().then( (data) => {
       done('Unhandled no sistema name');
     } ).catch( (reason) => {
       mockStubs.getAllSistemaDbUsers.calledOnce.should.be.ok;
       mockStubs.getTablesReadByUser.calledOnce.should.be.not.ok;
-      reason.should.be.equal('No Sistema name provided');
+      reason.should.be.deep.equal({status:'Failure',data:'No Sistema name provided'});
       done();
     } );
   });
 
   it('should handle empty sistema name on tabelas read by Sistema', (done) => {
     mockStubs.getAllSistemaDbUsers = sinon.stub(MapaInformacaoConnector.prototype,'getAllSistemaDbUsers');
-    mockStubs.getAllSistemaDbUsers.callsFake( () => {return new Promise( (resolve,reject) => reject('No Sistema name provided') )} );
+    mockStubs.getAllSistemaDbUsers.callsFake( () => {return new Promise( (resolve,reject) => reject({status:'Failure',data:'No Sistema name provided'}) )} );
     mockStubs.getTablesReadByUser = sinon.stub(MapaInformacaoConnector.prototype,'getTablesReadByUser');
-    mockStubs.getTablesReadByUser.callsFake( () => {return new Promise( (resolve) => resolve(tabelasParsedResults) )} );
+    mockStubs.getTablesReadByUser.callsFake( () => {return new Promise( (resolve) => resolve({status:'Success',data:tabelasParsedResults}) )} );
 
     Sistemas.getTablesReadBySistema('').then( (data) => {
       done('Unhandled no sistema name');
     } ).catch( (reason) => {
       mockStubs.getAllSistemaDbUsers.calledOnce.should.be.ok;
       mockStubs.getTablesReadByUser.calledOnce.should.be.not.ok;
-      reason.should.be.equal('No Sistema name provided');
+      reason.should.be.deep.equal({status:'Failure',data:'No Sistema name provided'});
       done();
     } );
   });
 
   it('should handle empty user list on tabelas read by Sistema', (done) => {
     mockStubs.getAllSistemaDbUsers = sinon.stub(MapaInformacaoConnector.prototype,'getAllSistemaDbUsers');
-    mockStubs.getAllSistemaDbUsers.callsFake( () => {return new Promise( (resolve,reject) => resolve([]) )} );
+    mockStubs.getAllSistemaDbUsers.callsFake( () => {return new Promise( (resolve,reject) => resolve({status:'Success',data:[]}) )} );
     mockStubs.getTablesReadByUser = sinon.stub(MapaInformacaoConnector.prototype,'getTablesReadByUser');
-    mockStubs.getTablesReadByUser.callsFake( () => {return new Promise( (resolve) => resolve(tabelasParsedResults) )} );
+    mockStubs.getTablesReadByUser.callsFake( () => {return new Promise( (resolve) => resolve({status:'Success',data:tabelasParsedResults}) )} );
 
     Sistemas.getTablesReadBySistema('Test1').then( (data) => {
       mockStubs.getAllSistemaDbUsers.calledOnce.should.be.ok;
       mockStubs.getTablesReadByUser.calledOnce.should.be.not.ok;
-      data.should.be.deep.equal({results:{}, totalTabelas:0});
+      data.should.be.deep.equal({status:'Success',data:{results:{}, totalTabelas:0}});
       done();
     } ).catch( (reason) => {
       done(reason);
@@ -189,16 +190,16 @@ describe('Sistemas Model', () => {
 
   it('should handle get tables by user exception on tabelas read by Sistema', (done) => {
     mockStubs.getAllSistemaDbUsers = sinon.stub(MapaInformacaoConnector.prototype,'getAllSistemaDbUsers');
-    mockStubs.getAllSistemaDbUsers.callsFake( () => {return new Promise( (resolve,reject) => resolve(allUsers) )} );
+    mockStubs.getAllSistemaDbUsers.callsFake( () => {return new Promise( (resolve,reject) => resolve({status:'Success',data:allUsers}) )} );
     mockStubs.getTablesReadByUser = sinon.stub(MapaInformacaoConnector.prototype,'getTablesReadByUser');
-    mockStubs.getTablesReadByUser.callsFake( () => {return new Promise( (resolve,reject) => reject('Error on fetching tabelas') )} );
+    mockStubs.getTablesReadByUser.callsFake( () => {return new Promise( (resolve,reject) => reject({status:'Failure',data:'Error on fetching tabelas'}) )} );
 
     Sistemas.getTablesReadBySistema('Test1').then( (data) => {
       done('Unhandled exception');
     } ).catch( (reason) => {
       mockStubs.getAllSistemaDbUsers.calledOnce.should.be.ok;
       mockStubs.getTablesReadByUser.calledOnce.should.be.ok;
-      reason.should.be.equal('Error on fetching tabelas');
+      reason.should.be.deep.equal({status:'Failure',data:'Error on fetching tabelas'});
       done();
     } );
   });
