@@ -1,6 +1,6 @@
 {
   "name": "base-autoritativa-api",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "API for several authoritative databases subjects",
   "main": "dist",
   "scripts": {
