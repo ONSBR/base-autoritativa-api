@@ -16,13 +16,15 @@ let mockStubs = {
   users: {},
   tables: {},
   tabelas_de_banco_de_dados: {},
-  create_pages_tabelas_de_banco_de_dados: {}
+  create_pages_tabelas_de_banco_de_dados: {},
+  create_page_tabela_de_banco_de_dados: {}
 };
 
 import Api from '../../src/api';
 
 
 let should = chai.should();
+let expect = chai.expect;
 let db = {}, config = {};
 
 sinon.config = {
@@ -168,6 +170,21 @@ describe('base-autoritativa-api', () => {
     router.handle({ url: '/bulkcreate/create_pages_tabelas_de_banco_de_dados', method: 'GET' }, {end:() => {return}}, () => {
       mockStubs.create_pages_tabelas_de_banco_de_dados.calledOnce.should.be.ok;
       mockStubs.create_pages_tabelas_de_banco_de_dados.restore();
+      done();
+    });
+  });
+
+  it('should call bulkcreate api module function from /bulkcreate/create_page_tabela_de_banco_de_dados/:nome_tabela', (done) => {
+    mockStubs.create_page_tabela_de_banco_de_dados = sinon.stub(bulkcreate.extraFunctions.create_page_tabela_de_banco_de_dados,'action');
+    mockStubs.create_page_tabela_de_banco_de_dados.callsFake((req,res) => {
+      expect(req.nome_tabela).to.be.ok;
+      req.nome_tabela.should.be.equal('tabela');
+      return res.json({})
+    });
+    let router = Api({ config, db });
+    router.handle({ url: '/bulkcreate/create_page_tabela_de_banco_de_dados/tabela', method: 'GET' }, {end:() => {return}}, () => {
+      mockStubs.create_page_tabela_de_banco_de_dados.calledOnce.should.be.ok;
+      mockStubs.create_page_tabela_de_banco_de_dados.restore();
       done();
     });
   });

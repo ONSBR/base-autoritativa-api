@@ -226,4 +226,111 @@ describe('bulkcreate handler', () => {
     bulkcreate.extraFunctions.create_pages_tabelas_de_banco_de_dados.action({},res);
   });
 
+  it('should create a single page of Tabela de Banco de dados', (done) => {
+    let createOnePageTabelaDeBancoDeDadosResponse = {
+      status:'Success',
+      data:[
+        {nome:'Tabela1',result:'Success'}
+      ]
+    };
+    mockStubs.getTabelasDeBancoDeDadosLinks = sinon.stub(Tabelas,'getTabelasDeBancoDeDadosLinks');
+    mockStubs.getTabelasDeBancoDeDadosLinks.callsFake( () => {
+      return new Promise( (resolve) => {
+        resolve(getTabelasDeBancoDeDadosLinksResponse);
+      });
+    });
+    mockStubs.createPageTabelaDeBancoDeDados = sinon.stub(Tabelas,'createPageTabelaDeBancoDeDados');
+    mockStubs.createPageTabelaDeBancoDeDados.callsFake( (tabelas) => {
+      expect(tabelas).to.be.ok;
+      tabelas.should.be.a('array');
+      tabelas.should.be.deep.equal(['tabela']);
+      return new Promise( (resolve) => {
+
+        resolve(createOnePageTabelaDeBancoDeDadosResponse);
+      });
+    });
+    let res = {
+      json: (data) => {
+        mockStubs.getTabelasDeBancoDeDadosLinks.calledOnce.should.be.not.ok;
+        mockStubs.createPageTabelaDeBancoDeDados.calledOnce.should.be.ok;
+        data.should.be.deep.equal(createOnePageTabelaDeBancoDeDadosResponse);
+        mockStubs.getTabelasDeBancoDeDadosLinks.restore();
+        mockStubs.createPageTabelaDeBancoDeDados.restore();
+        done();
+      },
+      status: (stat) => {
+        return {
+          send:(payload)=>{
+            mockStubs.getTabelasDeBancoDeDadosLinks.restore();
+            mockStubs.createPageTabelaDeBancoDeDados.restore();
+            done(payload);
+          }};
+      }
+    }
+    bulkcreate.extraFunctions.create_page_tabela_de_banco_de_dados.action({nome_tabela:'tabela'},res);
+  });
+
+  it('should handle no tabela name on create on tabela de banco de dados', (done) => {
+    mockStubs.getTabelasDeBancoDeDadosLinks = sinon.stub(Tabelas,'getTabelasDeBancoDeDadosLinks');
+    mockStubs.getTabelasDeBancoDeDadosLinks.callsFake( () => {
+      return new Promise( (resolve) => {
+        resolve(getTabelasDeBancoDeDadosLinksResponse);
+      });
+    });
+    mockStubs.createPageTabelaDeBancoDeDados = sinon.stub(Tabelas,'createPageTabelaDeBancoDeDados');
+    mockStubs.createPageTabelaDeBancoDeDados.callsFake( () => {
+      return new Promise( (resolve,reject) => {
+        reject(failureCreatePageTabelaDeBancoDeDadosResponse);
+      });
+    });
+    let res = {
+      json:(data) => done('Unhandled exception'),
+      status: (errCode) => {
+        return {
+          send:(reason)=>{
+            mockStubs.getTabelasDeBancoDeDadosLinks.calledOnce.should.be.not.ok;
+            mockStubs.createPageTabelaDeBancoDeDados.calledOnce.should.be.not.ok;
+            errCode.should.be.equal(400);
+            reason.should.be.ok;
+            reason.should.be.deep.equal({status:'Failure',data:'Invalid tabela name'});
+            mockStubs.getTabelasDeBancoDeDadosLinks.restore();
+            mockStubs.createPageTabelaDeBancoDeDados.restore();
+            done();
+          }};
+      }
+    };
+    bulkcreate.extraFunctions.create_page_tabela_de_banco_de_dados.action({},res);
+  });
+
+  it('should handle empty tabela name on create on tabela de banco de dados', (done) => {
+    mockStubs.getTabelasDeBancoDeDadosLinks = sinon.stub(Tabelas,'getTabelasDeBancoDeDadosLinks');
+    mockStubs.getTabelasDeBancoDeDadosLinks.callsFake( () => {
+      return new Promise( (resolve) => {
+        resolve(getTabelasDeBancoDeDadosLinksResponse);
+      });
+    });
+    mockStubs.createPageTabelaDeBancoDeDados = sinon.stub(Tabelas,'createPageTabelaDeBancoDeDados');
+    mockStubs.createPageTabelaDeBancoDeDados.callsFake( () => {
+      return new Promise( (resolve,reject) => {
+        reject(failureCreatePageTabelaDeBancoDeDadosResponse);
+      });
+    });
+    let res = {
+      json:(data) => done('Unhandled exception'),
+      status: (errCode) => {
+        return {
+          send:(reason)=>{
+            mockStubs.getTabelasDeBancoDeDadosLinks.calledOnce.should.be.not.ok;
+            mockStubs.createPageTabelaDeBancoDeDados.calledOnce.should.be.not.ok;
+            errCode.should.be.equal(400);
+            reason.should.be.ok;
+            reason.should.be.deep.equal({status:'Failure',data:'Invalid tabela name'});
+            mockStubs.getTabelasDeBancoDeDadosLinks.restore();
+            mockStubs.createPageTabelaDeBancoDeDados.restore();
+            done();
+          }};
+      }
+    };
+    bulkcreate.extraFunctions.create_page_tabela_de_banco_de_dados.action({nome_tabela:''},res);
+  });
 });

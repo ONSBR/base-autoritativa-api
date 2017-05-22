@@ -15,8 +15,16 @@ function setRoutes(config, db, handler, parameterPath ) {
   let router = resource(handler.generalFunctions);
   for (let key in handler.extraFunctions) {
 		let extraFunction = handler.extraFunctions[key];
-    router[extraFunction.verb](parameterPath+key,extraFunction.action);
+    if (extraFunction.param) {
+			router.param(extraFunction.param,function(req, res, next, id){
+				req[extraFunction.param] = id;
+				next();
+			});
+			router[extraFunction.verb](parameterPath+key+'/:'+extraFunction.param,extraFunction.action);
+		}
+		else router[extraFunction.verb](parameterPath+key,extraFunction.action);
   }
+	// console.log(router);
   return router;
 }
 

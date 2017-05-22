@@ -26,6 +26,20 @@ let extraFunctions = {
         })
         .catch( (reason) => res.status(400).send(reason));
     }
+  },
+  create_page_tabela_de_banco_de_dados:{
+    verb:'get',
+    param:'nome_tabela',
+    action:(req,res) => {
+      let tabela = req.nome_tabela;
+      if (!tabela || tabela.length == 0) res.status(400).send({status:'Failure',data:'Invalid tabela name'});
+      else {
+        let tabelas = [ tabela ];
+        Tabelas.createPageTabelaDeBancoDeDados(tabelas)
+          .then( (data) => res.json(data))
+          .catch( (reason) => res.status(400).send(reason));
+      }
+    }
   }
 }
 
