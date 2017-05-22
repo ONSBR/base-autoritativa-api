@@ -32,19 +32,56 @@ let generalFunctions = {
       .catch( (reason) => callback(reason) );
   },
 
-  /** GET / - List all entities */
+  /**
+   * @api {get} /sistemas/:sistema Get Sistema
+   * @apiVersion 1.0.0
+   * @apiName GetSistema
+   * @apiGroup Sistemas
+   * @apiDescription Get a sistema detail
+   * @apiParam {String} sistema Name of Sistema
+   * @apiPermission annonimous
+   * @apiSuccess {String} Status Sistema situation
+   * @apiSuccess {String} Codigo Known id of Sistema
+   * @apiSuccess {DateTime} Data_de_Cadastro Date and time of Sistema insertion
+   * @apiSuccess {String} Identificador Same as Código
+   * @apiSuccess {String} Descricao description of Sistema
+   * @apiSuccess {String} Gerencia_Responsavel Name of organization unit owner
+   * @apiSuccess {String} URL_de_Producao Sistema endpoint
+   * @apiSuccess {String} Processo_ONS_Associado Related processes
+   * @apiSuccess {String} Nome Fullname of Sistema
+   * @apiSuccess {String} Diretoria main organization unit owner
+   * @apiSuccess {Number} id Identificador on Mapa da Informação
+   */
   index({ params }, res) {
     Sistemas.getAll()
       .then( (data) => res.json(data.data) )
       .catch( (reason) => res.status(400).send(reason) );
   },
 
-  /** GET /:id - Return a given entity */
+  /**
+   * @api {get} /sistemas List Sistemas
+   * @apiVersion 1.0.0
+   * @apiName GetSistemas
+   * @apiGroup Sistemas
+   * @apiDescription Get a sistema detail
+   * @apiPermission annonimous
+   * @apiSuccess {Object[]} List of Sistema Object
+   */
   read({ sistema }, res) {
     res.json(sistema);
   }
 };
 let extraFunctions = {
+  /**
+   * @api {get} /sistemas/:sistema/users Get Sistema Db users
+   * @apiVersion 1.0.0
+   * @apiName GetSistemaDbUsers
+   * @apiGroup Sistemas
+   * @apiDescription Get a list of sistema database users
+   * @apiParam {String} sistema Name of Sistema
+   * @apiPermission annonimous
+   * @apiSuccess {Object[]} List of bd users
+   */
   users:{
     verb:'get',
     action:({params},res) => {
@@ -59,6 +96,16 @@ let extraFunctions = {
       }
     }
   },
+  /**
+   * @api {get} /sistemas/:sistema/tables Get Sistema read access tables
+   * @apiVersion 1.0.0
+   * @apiName GetSistemaTables
+   * @apiGroup Sistemas
+   * @apiDescription Get a list of sistema database tables with read permissions
+   * @apiParam {String} sistema Name of Sistema
+   * @apiPermission annonimous
+   * @apiSuccess {Object[]} results List of read access of sistema
+   */
   tables:{
     verb:'get',
     action:({params, query},res) => {

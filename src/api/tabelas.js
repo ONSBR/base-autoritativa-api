@@ -26,7 +26,22 @@ let generalFunctions = {
       .catch( (reason) => callback(reason) );
   },
 
-  /** GET /:id - Return a given entity */
+  /**
+   * @api {get} /tables/:tabela Get Tabela
+   * @apiVersion 1.0.0
+   * @apiName GetTabela
+   * @apiGroup Tabelas
+   * @apiDescription Get a Tabela detail
+   * @apiParam {String} tabela Name of Tabela
+   * @apiPermission annonimous
+   * @apiSuccess {String} Codigo Tabela Identificador
+   * @apiSuccess {DateTime} Data_de_Cadastro Date and time of Tabela insertion
+   * @apiSuccess {String} Identificador Same as Código
+   * @apiSuccess {String} Descricao description of Tabela
+   * @apiSuccess {Number} Numero_de_Linhas Number of records on table
+   * @apiSuccess {String} Nome Fullname of Tabela
+   * @apiSuccess {Number} id Identificador on Mapa da Informação
+   */
   read({tabela,query}, res) {
     let format = query.format;
     if (format && 'csv' == format.toLowerCase()) {

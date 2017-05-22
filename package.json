@@ -42,6 +42,7 @@
     "resource-router-middleware": "^0.6.0"
   },
   "devDependencies": {
+    "apidoc": "^0.17.6",
     "babel-cli": "^6.9.0",
     "babel-core": "^6.9.0",
     "babel-eslint": "^7.2.3",
@@ -69,5 +70,16 @@
     "graph",
     "api",
     "webapi"
-  ]
+  ],
+  "apidoc":{
+    "name": "base-autoritativa-api",
+    "version": "1.0.0",
+    "description": "API for several authoritative databases subjects",
+    "title": "API of Base authoritatives",
+    "url" : "https://wiki.devdc.ons.org.br:3000",
+    "template": {
+    	"withCompare": true,
+    	"withGenerator": true
+    }
+  }
 }
