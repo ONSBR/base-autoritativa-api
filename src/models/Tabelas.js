@@ -5,16 +5,11 @@ import {MapaInformacaoConnector, MediaWikiConnector} from 'base-autoritativa-con
 class Tabelas extends ModelBase{
   constructor() {
     super();
-    this.statements = {
-      "tabelasWiki":"/api.php?action=ask&format=json&query=%5B%5BPossui+direito+de+leitura+em%3A%3A%2B%5D%5D%7C%3FPossui+direito+de+leitura+em%7Cmainlabel%3D-+",
-      "create_page":"/api.php?action=edit&format=json&title=__PAGETITLE__&section=0&text=__BODY__&token=__TOKEN__",
-      "get_token":"/api.php?action=query&meta=tokens"
-    }
   }
 
   setEntityConfig() {
     this.mapaInformacaoConnector = new MapaInformacaoConnector(this.config.mapaInformacaoBaseUrl,this.config.authentication);
-    this.mediaWikiConnector = new MediaWikiConnector(this.config.mapaInformacaoBaseUrl,this.config.authentication);
+    this.mediaWikiConnector = new MediaWikiConnector(this.config.wikiBaseUrl);
   }
   /**
   *
@@ -62,7 +57,9 @@ class Tabelas extends ModelBase{
                   .catch( (reason) => reject(reason));
               }
             })
-            .catch( (reason) => reject(reason));
+            .catch( (reason) => {
+              reject(reason)
+            });
         }
       });
     }
